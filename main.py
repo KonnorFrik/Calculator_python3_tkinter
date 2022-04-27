@@ -3,23 +3,23 @@ import numexpr as ne
 
 
 class Calculator(tk.Tk):
-    window_width = 380
-    window_height = 549
+    window_width = 320      # 320
+    window_height = 422     # 422
     window_offset_x = 800
     window_offset_y = 300
     action_list = ["+", "-", "*", "/"]
 
-    button_pady = 5
-    button_padx = 3
-    button_width = 4
-    button_height = 3
+    button_pady = 4.2     # 5
+    button_padx = 3     # 3
+    button_width = 3    # 4
+    button_height = 2   # 3
     buttons_background = "grey88"
     buttons_font = "Arial 20"
-    buttons_boreground = 1.5
-    specific_button_pady = 0
-    specific_button_padx = 1
-    specific_button_width = 4
-    specific_button_height = 2
+    buttons_boreground = 1.5    # 1.5
+    specific_button_pady = 5.3    # 0
+    specific_button_padx = 1    # 1
+    specific_button_width = 3   # 4
+    specific_button_height = 1  # 2
 
     text_label_height = 3
     
@@ -134,7 +134,41 @@ class Calculator(tk.Tk):
                 return
             self.text_label["text"] = self.text_label["text"][0:] + event.widget["text"]
             return
+
+        if event.widget["text"] == ".":
+            self.parse_string()
+            return
+
         self.text_label["text"] += event.widget["text"]
+
+    def parse_string(self):
+        obj = self.text_label["text"]
+        result = {}
+        res_index = 0
+        buf = []
+        for letter in obj:
+            if letter in Calculator.action_list:
+                result[res_index] = buf
+                res_index += 1
+                result[res_index] = letter
+                res_index += 1
+                buf = []
+                continue
+            buf.append(letter)
+        result[res_index + 1] = buf
+        last_number = len(result)
+        buf = result[last_number]
+        if "." in buf:
+            if buf[0] == "0":
+                del buf[0]
+            del buf[buf.index('.')]
+            buf.append('.')
+        else:
+            buf.append('.')
+        string_return = ""
+        for key, val in result.items():
+            string_return += "".join(val)
+        self.text_label["text"] = string_return
 
     def calc_and_insert_result(self, event):
         try:
