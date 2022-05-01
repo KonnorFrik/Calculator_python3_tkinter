@@ -3,23 +3,23 @@ import numexpr as ne
 
 
 class Calculator(tk.Tk):
-    window_width = 320      # 320
-    window_height = 422     # 422
+    window_width = 423      # 320
+    window_height = 310     # 422
     window_offset_x = 800
     window_offset_y = 300
     action_list = ["+", "-", "*", "/"]
 
-    button_pady = 4.2     # 5
-    button_padx = 3     # 3
-    button_width = 3    # 4
-    button_height = 2   # 3
+    button_pady = 0     # 5 | 4.2
+    button_padx = 5     # 3
+    button_width = 3    # 4 | 3
+    button_height = 1   # 3 | 2
     buttons_background = "grey88"
     buttons_font = "Arial 20"
     buttons_boreground = 1.5    # 1.5
-    specific_button_pady = 5.3    # 0
-    specific_button_padx = 1    # 1
-    specific_button_width = 3   # 4
-    specific_button_height = 1  # 2
+    specific_button_pady = 5.3    # 0 | 5.3
+    specific_button_padx = 5    # 1
+    specific_button_width = 3   # 4 | 3
+    specific_button_height = 1  # 2 | 1
 
     text_label_height = 3
     
@@ -27,7 +27,7 @@ class Calculator(tk.Tk):
         super().__init__()
 
         self.buttons_frame = tk.Frame(self)
-        self.buttons_action_frame = tk.Frame(self.buttons_frame)
+        # self.buttons_action_frame = tk.Frame(self.buttons_frame)
         self.text_label = tk.Label(self)
 
         self.button_0 = tk.Button(self.buttons_frame)
@@ -42,12 +42,14 @@ class Calculator(tk.Tk):
         self.button_9 = tk.Button(self.buttons_frame)
         self.button_equal = tk.Button(self.buttons_frame)
         self.button_comma = tk.Button(self.buttons_frame)
-        self.button_plus = tk.Button(self.buttons_action_frame)
-        self.button_minus = tk.Button(self.buttons_action_frame)
-        self.button_multiply = tk.Button(self.buttons_action_frame)
-        self.button_divide = tk.Button(self.buttons_action_frame)
-        self.button_backspace = tk.Button(self.buttons_action_frame)
-        self.button_clear_all = tk.Button(self.buttons_action_frame)
+        self.button_plus = tk.Button(self.buttons_frame)
+        self.button_minus = tk.Button(self.buttons_frame)
+        self.button_multiply = tk.Button(self.buttons_frame)
+        self.button_divide = tk.Button(self.buttons_frame)
+        self.button_clear_all = tk.Button(self.buttons_frame)
+        self.button_backspace = tk.Button(self.buttons_frame)
+        self.button_bracket_open = tk.Button(self.buttons_frame)
+        self.button_bracket_close = tk.Button(self.buttons_frame)
 
         self.init_ui()
 
@@ -75,6 +77,8 @@ class Calculator(tk.Tk):
         self.button_divide.configure(width=Calculator.specific_button_width, height=Calculator.specific_button_height, text="/", bg=Calculator.buttons_background, font=Calculator.buttons_font, bd=Calculator.buttons_boreground)
         self.button_backspace.configure(width=Calculator.specific_button_width, height=Calculator.specific_button_height, text="<-", bg=Calculator.buttons_background, font=Calculator.buttons_font, bd=Calculator.buttons_boreground)
         self.button_clear_all.configure(width=Calculator.specific_button_width, height=Calculator.specific_button_height, text="Clear", bg=Calculator.buttons_background, font=Calculator.buttons_font, bd=Calculator.buttons_boreground)
+        self.button_bracket_open.configure(width=Calculator.specific_button_width, height=Calculator.specific_button_height, text="(", bg=Calculator.buttons_background, font=Calculator.buttons_font, bd=Calculator.buttons_boreground)
+        self.button_bracket_close.configure(width=Calculator.specific_button_width, height=Calculator.specific_button_height, text=")", bg=Calculator.buttons_background, font=Calculator.buttons_font, bd=Calculator.buttons_boreground)
 
         self.button_0.bind("<Button-1>", self.insert_symbol)
         self.button_1.bind("<Button-1>", self.insert_symbol)
@@ -92,8 +96,17 @@ class Calculator(tk.Tk):
         self.button_minus.bind("<Button-1>", self.insert_symbol)
         self.button_multiply.bind("<Button-1>", self.insert_symbol)
         self.button_divide.bind("<Button-1>", self.insert_symbol)
-        self.button_backspace.bind("<Button-1>", self.backspace)
         self.button_clear_all.bind("<Button-1>", self.clear_all)
+        self.button_backspace.bind("<Button-1>", self.backspace)
+        self.button_bracket_open.bind("<Button-1>", self.insert_symbol)
+        self.button_bracket_close.bind("<Button-1>", self.insert_symbol)
+
+        self.bind("<KP_Enter>", self.calc_and_insert_result)
+        self.bind("<BackSpace>", self.backspace)
+        self.bind("<Shift-BackSpace>", self.clear_all)
+        self.bind("<Key>", self.numpad_insert)
+        self.bind("<Return>", self.calc_and_insert_result)
+
 
         self.text_label.pack(fill=tk.X, expand=0)
         self.buttons_frame.pack(fill=tk.BOTH, expand=1)
@@ -110,13 +123,15 @@ class Calculator(tk.Tk):
         self.button_equal.grid(row=3, column=2, pady=Calculator.button_pady, padx=Calculator.button_padx)
         self.button_comma.grid(row=3, column=0, pady=Calculator.button_pady, padx=Calculator.button_padx)
 
-        self.buttons_action_frame.grid(row=0, column=3, rowspan=10)
-        self.button_clear_all.grid(row=0, column=0, pady=Calculator.specific_button_pady, padx=Calculator.specific_button_padx)
-        self.button_backspace.grid(row=1, column=0, pady=Calculator.specific_button_pady, padx=Calculator.specific_button_padx)
-        self.button_multiply.grid(row=2, column=0, pady=Calculator.specific_button_pady, padx=Calculator.specific_button_padx)
-        self.button_plus.grid(row=3, column=0, pady=Calculator.specific_button_pady, padx=Calculator.specific_button_padx)
-        self.button_minus.grid(row=4, column=0, pady=Calculator.specific_button_pady, padx=Calculator.specific_button_padx)
-        self.button_divide.grid(row=5, column=0, pady=Calculator.specific_button_pady, padx=Calculator.specific_button_padx)
+        # self.buttons_action_frame.grid(row=0, column=3, rowspan=10)
+        self.button_multiply.grid(row=0, column=3, pady=Calculator.specific_button_pady, padx=Calculator.specific_button_padx)
+        self.button_plus.grid(row=1, column=3, pady=Calculator.specific_button_pady, padx=Calculator.specific_button_padx)
+        self.button_minus.grid(row=2, column=3, pady=Calculator.specific_button_pady, padx=Calculator.specific_button_padx)
+        self.button_divide.grid(row=3, column=3, pady=Calculator.specific_button_pady, padx=Calculator.specific_button_padx)
+        self.button_clear_all.grid(row=0, column=4, pady=Calculator.specific_button_pady, padx=Calculator.specific_button_padx)
+        self.button_backspace.grid(row=1, column=4, pady=Calculator.specific_button_pady, padx=Calculator.specific_button_padx)
+        self.button_bracket_open.grid(row=2, column=4, pady=Calculator.specific_button_pady, padx=Calculator.specific_button_padx)
+        self.button_bracket_close.grid(row=3, column=4, pady=Calculator.specific_button_pady, padx=Calculator.specific_button_padx)
 
     def backspace(self, event):
         self.text_label["text"] = self.text_label["text"][0:-1]
@@ -124,16 +139,42 @@ class Calculator(tk.Tk):
     def clear_all(self, event):
         self.text_label["text"] = "0"
 
-    def insert_symbol(self, event):
-        if self.text_label["text"][0] == '0':
-            self.text_label["text"] = self.text_label["text"][1:]
-
-        if event.widget["text"] in Calculator.action_list:
-            if self.text_label["text"][-1] in Calculator.action_list:
-                self.text_label["text"] = self.text_label["text"][0:-1] + event.widget["text"]
-                return
-            self.text_label["text"] = self.text_label["text"][0:] + event.widget["text"]
+    def numpad_insert(self, event):
+        if event.keycode not in range(10, 20) and event.char not in Calculator.action_list and "KP" not in event.keysym:
             return
+
+        try:
+            if self.text_label["text"][0] == '0':
+                self.text_label["text"] = self.text_label["text"][1:]
+
+            if event.char in Calculator.action_list:
+                if self.text_label["text"][-1] in Calculator.action_list:
+                    self.text_label["text"] = self.text_label["text"][0:-1] + event.char
+                    return
+                self.text_label["text"] = self.text_label["text"][0:] + event.char
+                return
+        except IndexError:
+            pass
+
+        if event.char == ".":
+            self.parse_string()
+            return
+
+        self.text_label["text"] += event.char
+
+    def insert_symbol(self, event):
+        try:
+            if self.text_label["text"][0] == '0':
+                self.text_label["text"] = self.text_label["text"][1:]
+
+            if event.widget["text"] in Calculator.action_list:
+                if self.text_label["text"][-1] in Calculator.action_list:
+                    self.text_label["text"] = self.text_label["text"][0:-1] + event.widget["text"]
+                    return
+                self.text_label["text"] = self.text_label["text"][0:] + event.widget["text"]
+                return
+        except IndexError:
+            pass
 
         if event.widget["text"] == ".":
             self.parse_string()
